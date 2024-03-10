@@ -1,11 +1,15 @@
 package com.example.superquiz.ui.quiz;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -18,6 +22,7 @@ import com.example.superquiz.R;
 import com.example.superquiz.data.Question;
 import com.example.superquiz.databinding.FragmentQuizBinding;
 import com.example.superquiz.injection.ViewModelFactory;
+import com.example.superquiz.ui.welcome.WelcomeFragment;
 
 import java.util.Arrays;
 import java.util.List;
@@ -102,6 +107,18 @@ public class QuizFragment extends Fragment {
             }
         });
         //Action sur ce bouton
+        binding.next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Boolean isLastQuestion = viewModel.isLastQuestion.getValue();
+                if(isLastQuestion != null && isLastQuestion){
+                    displayResultDialog();
+                } else {
+                    viewModel.nextQuestion();
+                    resetQuestion();
+                }
+            }
+        });
     }
 
     private void updateQuestion(Question question) {
@@ -139,4 +156,35 @@ public class QuizFragment extends Fragment {
             answer.setEnabled(enable);
         });
     }
+
+    private void displayResultDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+        builder.setTitle("Finished !");
+        Integer score = viewModel.score.getValue();
+        builder.setMessage("Your final score is "+ score);
+        builder.setPositiveButton("Quit", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                goToWelcomeFragment();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+    private void goToWelcomeFragment(){
+        WelcomeFragment welcomeFragment = WelcomeFragment.newInstance();
+        FragmentManager fragmentManager = getParentFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager
+                .beginTransaction();
+        fragmentTransaction.replace(R.id.container, welcomeFragment).commit();
+    }
+    private void resetQuestion(){
+        List<Button> allAnswers = Arrays.asList(binding.answer1, binding.answer2, binding.answer3, binding.answer4);
+        allAnswers.forEach( answer -> {
+            answer.setBackgroundColor(Color.parseColor("#6200EE"));
+        });
+        binding.validityText.setVisibility(View.INVISIBLE);
+        enableAllAnswers(true);
+    }
+
 }

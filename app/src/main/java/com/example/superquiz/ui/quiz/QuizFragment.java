@@ -30,6 +30,8 @@ import java.util.List;
 public class QuizFragment extends Fragment {
     private FragmentQuizBinding binding;
     private QuizViewModel viewModel;
+
+    // Méthode pour créer une nouvelle instance du fragment
     public static QuizFragment newInstance() {
         QuizFragment fragment = new QuizFragment();
         return fragment;
@@ -38,6 +40,7 @@ public class QuizFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Initialise le ViewModel pour le quiz
         viewModel = new ViewModelProvider(this, ViewModelFactory.getInstance()).get(QuizViewModel.class);
 
     }
@@ -64,6 +67,7 @@ public class QuizFragment extends Fragment {
         });
 
         /* événements */
+        // Gestion des événements des boutons de réponse
         //Récupérer la réponse
         binding.answer1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -95,7 +99,7 @@ public class QuizFragment extends Fragment {
         //Passer à la suite
 
 
-        //Bouton "Next" ou "Finish"? Ecoute de la livedata isLastQuestion de
+        // Gestion du bouton "Next" ou "Finish"
         viewModel.isLastQuestion.observe(getViewLifecycleOwner(), new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean isLastQuestion) {
@@ -106,7 +110,7 @@ public class QuizFragment extends Fragment {
                 }
             }
         });
-        //Action sur ce bouton
+        // Action sur le bouton "Next"
         binding.next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -121,6 +125,7 @@ public class QuizFragment extends Fragment {
         });
     }
 
+    // Méthode pour mettre à jour la question affichée
     private void updateQuestion(Question question) {
         binding.question.setText(question.getQuestion());
         binding.answer1.setText(question.getChoiceList().get(0));
@@ -130,12 +135,14 @@ public class QuizFragment extends Fragment {
         binding.next.setVisibility(View.INVISIBLE);
     }
 
+    // Méthode pour mettre à jour la réponse sélectionnée par l'utilisateur
     private void updateAnswer(Button button, Integer index){
         showAnswerValidity(button, index);
         enableAllAnswers(false);
         binding.next.setVisibility(View.VISIBLE);
     }
 
+    // Méthode pour afficher si la réponse sélectionnée est valide ou non
     private void showAnswerValidity(Button button, Integer index){
         Boolean isValid = viewModel.isAnswerValid(index);
         if (isValid) {
@@ -150,6 +157,7 @@ public class QuizFragment extends Fragment {
         binding.validityText.setVisibility(View.VISIBLE);
     }
 
+    // Méthode pour activer ou désactiver tous les boutons de réponse
     private void enableAllAnswers(Boolean enable){
         List<Button> allAnswers = Arrays.asList(binding.answer1, binding.answer2, binding.answer3, binding.answer4);
         allAnswers.forEach( answer -> {
@@ -157,6 +165,7 @@ public class QuizFragment extends Fragment {
         });
     }
 
+    // Méthode pour afficher la boîte de dialogue de résultat
     private void displayResultDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
@@ -171,6 +180,8 @@ public class QuizFragment extends Fragment {
         AlertDialog dialog = builder.create();
         dialog.show();
     }
+
+    // Méthode pour naviguer vers le fragment de bienvenue
     private void goToWelcomeFragment(){
         WelcomeFragment welcomeFragment = WelcomeFragment.newInstance();
         FragmentManager fragmentManager = getParentFragmentManager();
@@ -178,6 +189,8 @@ public class QuizFragment extends Fragment {
                 .beginTransaction();
         fragmentTransaction.replace(R.id.container, welcomeFragment).commit();
     }
+
+    // Méthode pour réinitialiser l'affichage de la question
     private void resetQuestion(){
         List<Button> allAnswers = Arrays.asList(binding.answer1, binding.answer2, binding.answer3, binding.answer4);
         allAnswers.forEach( answer -> {
